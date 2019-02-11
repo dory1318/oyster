@@ -2,6 +2,7 @@ require 'oystercard'
 
 describe Oystercard do
   let(:station){ double :station }
+  let(:exit_station){ double :exit_station }
 it 'has initial balance zero' do
   expect(subject.balance).to eq 0
 end
@@ -20,23 +21,23 @@ it 'balance cannot be less than £1' do
 end
 
 it 'we are not in journey without touch in' do
-expect(subject.in_journey?).to eq(false)
+expect(subject.in_journey?).to eq(true)
 end
 
 it 'is in journey'do
   subject.top_up(2)
   subject.touch_in(station)
-  expect(subject.in_journey?).to eq(true)
+  expect(subject.in_journey?).to eq(false)
 end
 
 it 'is not in journey anymore' do
-  subject.touch_out
-  expect(subject.in_journey?).to eq(false)
+  subject.touch_out(exit_station)
+  expect(subject.in_journey?).to eq(true)
   end
 
   it 'oyster is deducted by the correct fare' do
     subject.top_up(10)
-   expect{subject.touch_out}.to change{subject.balance}.by(-1)
+   expect{subject.touch_out(exit_station)}.to change{subject.balance}.by(-1)
   end
 
   it 'what is the entry station' do
@@ -44,4 +45,17 @@ it 'is not in journey anymore' do
     subject.touch_in(station)
     expect(subject.entry_station).to eq(station)
   end
+
+  it 'has empty journey history' do
+
+    expect(subject.history).to be_empty
+  end
+
+  it 'has saved the jounrey history' do
+    subject.top_up(50)
+   subject.touch_in(station)
+   subject.touch_out(exit_station)
+   expect(subject.history).not_to be_empty
+  end
+
 end
